@@ -1,0 +1,21 @@
+#!/bin/sh
+
+# First, toggle the reset pin to get the transceiver in a well-defined state
+# (this is part of the documented power-on-procedure).
+RESET_PIN=14
+
+# If the reset pin is not available yet through sysfs, export it so it becomes
+# available.
+if [ ! -d /sys/class/gpio/gpio${RESET_PIN} ]; then
+	echo ${RESET_PIN} > /sys/class/gpio/export
+fi
+
+# Make the pin an output and toggle it
+echo out > /sys/class/gpio/gpio${RESET_PIN}/direction
+echo 0 > /sys/class/gpio/gpio${RESET_PIN}/value
+sleep 0.001
+echo 1 > /sys/class/gpio/gpio${RESET_PIN}/value
+sleep 0.001
+echo 0 > /sys/class/gpio/gpio${RESET_PIN}/value
+
+"$(dirname $0)/lora_pkt_fwd"
